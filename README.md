@@ -3,10 +3,9 @@
 MMO idle de Pokémon que roda no navegador: você escolhe uma área, seu Pokémon caça sozinho, e o
 progresso continua com a aba fechada. A simulação inteira acontece no servidor.
 
-[![CI](https://github.com/M4rdine/pokeidle/actions/workflows/ci.yml/badge.svg)](https://github.com/M4rdine/pokeidle/actions/workflows/ci.yml)
+[![CI](https://github.com/Jefte31/TAGPOKE/actions/workflows/ci.yml/badge.svg)](https://github.com/Jefte31/TAGPOKE/actions/workflows/ci.yml)
 
-**▶ Jogue: <https://pokeidle.187-77-37-92.sslip.io>** — crie uma conta, escolha o inicial e mande
-caçar. O progresso continua com a aba fechada.
+**Deploy de referência:** <https://pokeidle.187-77-37-92.sslip.io> — hospedagem do projeto de origem, não necessariamente vinculada ao fork TAGPOKE. Para publicar este fork, veja [docs/deploy.md](docs/deploy.md).
 
 ![A tela de jogo: numa caverna, o Blastoise do jogador acerta 49 de dano num Arcanine selvagem a três tiles de distância; ficha e time à esquerda, golpes e situação à direita, registro embaixo](docs/imagens/jogo.webp)
 
@@ -66,6 +65,8 @@ num teste e dar sempre o mesmo resultado.
   58 µs por tick por treinador e cerca de 850 caçadas simultâneas a 25 % de CPU numa máquina.
 - **Progresso offline.** Quem volta depois de horas recebe a simulação recuperada em fatias, com
   teto de 12 horas.
+- **Zoom responsivo.** A caçada inicia em 1× em telas estreitas (2× no desktop), permite visão ampla
+  de 0,5×, zoom até 3× e tem botão **Normal** (1×). A escolha é lembrada neste navegador.
 - **Observabilidade de verdade.** `/metrics` no formato Prometheus (tick, caçadas, persistência,
   HTTP, erros) e um painel que lê o mesmo endpoint, os dois atrás de credencial.
 - **Pipeline de assets escrito do zero.** Leitura de sprites, atlas, fatiamento, tileset do Tiled
@@ -109,7 +110,7 @@ Pull request é bem-vindo, de qualquer tamanho — de correção de texto a áre
 pesado: abra a PR e conversamos nela.
 
 ```bash
-git clone https://github.com/M4rdine/pokeidle.git && cd pokeidle
+git clone https://github.com/Jefte31/TAGPOKE.git && cd TAGPOKE
 pnpm install
 docker compose up -d
 pnpm -r test
@@ -122,8 +123,9 @@ O que ajuda a PR a ser aceita rápido:
 - **`pnpm -r test` e `pnpm -r exec tsc --noEmit` verdes.** O CI roda os dois.
 - **Um assunto por PR.** Duas mudanças independentes revisam melhor separadas.
 
-A `main` é protegida: PR precisa de aprovação e dos quatro checks do CI verdes. Quando entra,
-publica sozinha em produção.
+**Neste fork**, é preciso habilitar o GitHub Actions e configurar a proteção da `main` para
+exigir os checks antes de mesclar. O deploy automático só deve ser habilitado depois de configurar
+os segredos e a VPS própria (não herdar os acessos do projeto de origem).
 
 Se quiser uma ideia do que fazer, as specs em `docs/superpowers/specs/` terminam com uma seção
 "fora de escopo" que registra, com o motivo, o que ficou por fazer em cada entrega.
