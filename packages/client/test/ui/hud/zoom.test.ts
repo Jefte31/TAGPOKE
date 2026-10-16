@@ -8,7 +8,7 @@
  */
 import { beforeEach, describe, expect, it } from 'vitest'
 import { mountZoom } from '../../../src/ui/hud/zoom.js'
-import { ZOOM_MAXIMO, ZOOM_MINIMO } from '../../../src/scene/zoom-limites.js'
+import { normalizarZoom, ZOOM_MAXIMO, ZOOM_MINIMO } from '../../../src/scene/zoom-limites.js'
 import type { Scene } from '../../../src/scene/app.js'
 
 /** Uma cena que só sabe o zoom, e o prende como a de verdade prende. */
@@ -16,7 +16,7 @@ function cenaFalsa(inicial: number): Scene {
   let z = inicial
   return {
     zoom: () => z,
-    setZoom: (n: number) => { z = Math.min(ZOOM_MAXIMO, Math.max(ZOOM_MINIMO, Math.round(n))) },
+    setZoom: (n: number) => { z = normalizarZoom(n) },
     applyView: () => {}, onEvent: () => {}, resize: () => {}, destroy: () => {},
   }
 }
@@ -64,6 +64,28 @@ describe('mountZoom', () => {
     expect(nivel()).toBe(`${ZOOM_MAXIMO}×`)
     expect(botao('Aproximar').disabled).toBe(true)
     expect(botao('Afastar').disabled).toBe(false)
+  })
+
+  it('afasta para 0,5x e volta a 1x com o botão Normal', () => {
+    const cena = cenaFalsa(1)
+    mountZoom(raiz, () => cena)
+    botao('Afastar').click()
+    expect(nivel()).toBe('0,5×')
+    expect(botao('Afastar').disabled).toBe(true)
+    botao('Restaurar zoom normal').click()
+    expect(nivel()).toBe('1×')
+    expect(botao('Restaurar zoom normal').disabled).toBe(true)
+  })
+
+  it('avisa apenas quando o zoom realmente mudou, para salvar a preferência', () => {
+    const valores: number[] = []
+    const cena = cenaFalsa(ZOOM_MINIMO)
+    mountZoom(raiz, () => cena, (valor) => valores.push(valor))
+    botao('Afastar').click()
+    expect(valores).toEqual([])
+    botao('Aproximar').click()
+    botao('Restaurar zoom normal').click()
+    expect(valores).toEqual([1])
   })
 
   it('desmontar tira o controle da tela', () => {
