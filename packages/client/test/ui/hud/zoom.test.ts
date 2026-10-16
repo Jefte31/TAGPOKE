@@ -59,8 +59,9 @@ describe('mountZoom', () => {
     controle.sincronizar()
     expect(botao('Afastar').disabled).toBe(true)
     expect(botao('Aproximar').disabled).toBe(false)
-    botao('Aproximar').click()
-    botao('Aproximar').click()
+    botao('Aproximar').click() // 0,5x -> 1x
+    botao('Aproximar').click() // 1x -> 2x
+    botao('Aproximar').click() // 2x -> 3x
     expect(nivel()).toBe(`${ZOOM_MAXIMO}×`)
     expect(botao('Aproximar').disabled).toBe(true)
     expect(botao('Afastar').disabled).toBe(false)
