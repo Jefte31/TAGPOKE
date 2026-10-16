@@ -1,17 +1,68 @@
 # Deploy
 
-> **Atenção a forks:** o domínio `pokeidle.187-77-37-92.sslip.io`, o script
-> `/opt/pokeidle/deploy.sh` e os nomes de segredos abaixo documentam a infraestrutura
-> do projeto original. Antes de habilitar `deploy.yml` no TAGPOKE, configure sua própria
-> VPS, URL pública e segredos. Clonar o repositório não publica o jogo automaticamente.
-> Depois de preparar sua infraestrutura, habilite explicitamente a variável de repositório
-> **Settings → Secrets and variables → Actions → Variables → New repository variable**
-> com nome `TAGPOKE_DEPLOY_ENABLED` e valor `true`. Sem essa variável, o workflow de deploy
-> fica desativado, mesmo quando o CI passa.
+> **Destino solicitado para o TAGPOKE:** `https://pokeidle.187-77-37-92.sslip.io`.
+> O endereço pode continuar com o nome "pokeidle": o que determina o código servido é
+> a configuração do **servidor**, não o nome do host nem o link do README.
+> O workflow ainda exige opt-in com `TAGPOKE_DEPLOY_ENABLED=true`; assim não atualiza
+> uma VPS que ainda esteja ligada ao projeto original por engano.
 
 O jogo roda como um container só: um processo serve a API, o WebSocket e o build do cliente. O
 Postgres fica fora. Nada no código conhece o provedor, então trocar de host é editar este
 documento e o `fly.toml`.
+
+## Vincular o endereço público ao TAGPOKE
+
+**URL pública desejada:** <https://pokeidle.187-77-37-92.sslip.io>.
+
+O GitHub não muda sozinho os arquivos de uma VPS. Neste repositório, o workflow
+`.github/workflows/deploy.yml` usa SSH com **comando forçado**: a chave na VPS só
+executa `/opt/pokeidle/deploy.sh`. Portanto, antes de habilitar o deploy é
+preciso confirmar **no servidor de destino** que esse script atualiza o repositório
+`Jefte31/TAGPOKE` e não o código do projeto original.
+
+1. Confirme que você administra a VPS desse endereço. Faça backup da pasta da
+   aplicação e do banco de dados antes de mudar a origem. Se há outros projetos
+   na máquina, não toque em suas configurações.
+2. Na VPS, confira a origem Git e eventuais mudanças locais:
+
+   ```bash
+   cd /opt/pokeidle/src
+   git remote -v
+   git status --short
+   ```
+
+3. **Somente se essa instalação for mesmo a do TAGPOKE** e estiver limpa, aponte
+   o `origin` para a origem desejada e atualize a `main`:
+
+   ```bash
+   git remote set-url origin https://github.com/Jefte31/TAGPOKE.git
+   git fetch origin main
+   git switch main
+   git pull --ff-only origin main
+   ```
+
+4. Verifique o conteúdo do comando forçado em
+   `/opt/pokeidle/deploy.sh`: ele deve reconstruir a imagem a partir de
+   `/opt/pokeidle/src`. Se a localização for diferente, ajuste o script
+   **no servidor** para o diretório certo. O script da VPS não é atualizado
+   automaticamente por uma alteração neste repositório.
+5. Confirme que o nginx envia
+   `pokeidle.187-77-37-92.sslip.io` à aplicação, o certificado HTTPS cobre esse
+   nome e o `APP_ORIGIN` do serviço é
+   `https://pokeidle.187-77-37-92.sslip.io`. Manter o mesmo hostname evita
+   precisar emitir outro certificado.
+6. No GitHub de **Jefte31/TAGPOKE**, configure os segredos
+   `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY` e `VPS_KNOWN_HOSTS` para essa VPS.
+   Em **Settings → Secrets and variables → Actions → Variables**, crie
+   `TAGPOKE_DEPLOY_ENABLED=true` **só depois** dessas verificações.
+   Use **Actions → Deploy → Run workflow** para publicar.
+7. Valide o endereço, `/health`, login e zoom no navegador. A página atualizada
+   do TAGPOKE exibe o título **TAGPOKE**; responder apenas `/health` não
+   comprova que foi publicado o repositório correto.
+
+**Importante:** atualizar README, título do jogo ou o workflow não altera o
+servidor remoto por si só. Sem acesso administrativo à VPS, esta etapa não
+pode ser realizada somente pelo GitHub.
 
 ## Variáveis obrigatórias em produção
 
