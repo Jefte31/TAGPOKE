@@ -11,6 +11,7 @@ import { mountTeamStrip } from '../hud/team-strip.js'
 import { mountMenu } from '../hud/menu.js'
 import { mountPerfil } from '../hud/perfil.js'
 import { mountZoom } from '../hud/zoom.js'
+import { passoZoom, ZOOM_NORMAL, zoomInicial } from '../../scene/zoom-limites.js'
 import { el, mount } from '../dom.js'
 
 /**
@@ -35,22 +36,28 @@ export function mountGame(root: HTMLElement, ctx: AppContext): () => void {
     mountMenu(menu, ctx), mountMoves(right, ctx), mountSituacao(right, ctx),
     mountLog(bottom, ctx), mountOverlays(center, ctx), mountCaptura(center, ctx)]
   let scene: Scene | null = null
-  const zoom = mountZoom(center, () => scene)
+  const guardarZoom = (valor: number): void => ctx.storage.setItem('pokeidle.zoom', String(valor))
+  const zoom = mountZoom(center, () => scene, guardarZoom)
   let offScene: (() => void) | null = null
   let offEvents: (() => void) | null = null
   let disposed = false
 
-  /*
-   * O atalho ficou RELATIVO, e não mais em dois níveis fixos: com três níveis, "+" que pula direto
-   * para o meio deixa de ser aproximar e vira ir-para-um-lugar. O controle na tela é sincronizado
-   * daqui porque o teclado muda o zoom por fora dele.
-   */
+  // Atalhos relativos (+/-) e retorno à visão normal (0). Não interceptar quando o
+  // usuário escreve em um campo nem os atalhos do navegador (Ctrl/⌘ +/-).
   const onKey = (ev: KeyboardEvent): void => {
-    if (!scene) return
-    if (ev.key === '+' || ev.key === '=') scene.setZoom(scene.zoom() + 1)
-    else if (ev.key === '-') scene.setZoom(scene.zoom() - 1)
+    if (!scene || ev.altKey || ev.ctrlKey || ev.metaKey) return
+    const alvo = ev.target
+    if (alvo instanceof HTMLElement && (alvo.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(alvo.tagName))) return
+    const atual = scene.zoom()
+    let proximo: number
+    if (ev.key === '+' || ev.key === '=') proximo = passoZoom(atual, 1)
+    else if (ev.key === '-') proximo = passoZoom(atual, -1)
+    else if (ev.key === '0') proximo = ZOOM_NORMAL
     else return
+    ev.preventDefault()
+    scene.setZoom(proximo)
     zoom.sincronizar()
+    if (scene.zoom() !== atual) guardarZoom(scene.zoom())
   }
   const onResize = (): void => scene?.resize()
   /**
@@ -79,6 +86,8 @@ export function mountGame(root: HTMLElement, ctx: AppContext): () => void {
         if (disposed) return
         scene = await createScene(center, { atlas: ctx.atlas, map, registry: ctx.registry, now: ctx.now })
         if (disposed) { scene.destroy(); scene = null; return }
+        // Telas estreitas começam em 1x; depois usamos a escolha salva no navegador.
+        scene.setZoom(zoomInicial(window.innerWidth, ctx.storage.getItem('pokeidle.zoom')))
         offScene = ctx.hunt.subscribe((view) => view, (view) => scene?.applyView(view))
         offEvents = ctx.loop?.onEvent((event, view) => scene?.onEvent(event, view)) ?? null
         window.addEventListener('keydown', onKey)
