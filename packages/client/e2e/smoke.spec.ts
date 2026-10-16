@@ -45,6 +45,14 @@ test('registrar, inicial, Campo Inicial, derrota, mochila, parar e comprar na lo
   await page.locator('.mapa-analise').getByRole('button', { name: 'Caçar aqui' }).click()
 
   await expect(page.locator('#scene canvas')).toBeVisible({ timeout: 30_000 })
+  // A visão ampla e a restauração precisam funcionar no navegador.
+  const zoom = page.getByRole('group', { name: 'Zoom do mapa' })
+  await expect(zoom.getByText('2×')).toBeVisible()
+  await zoom.getByRole('button', { name: 'Afastar' }).click()
+  await zoom.getByRole('button', { name: 'Afastar' }).click()
+  await expect(zoom.getByText('0,5×')).toBeVisible()
+  await zoom.getByRole('button', { name: 'Restaurar zoom normal' }).click()
+  await expect(zoom.getByText('1×')).toBeVisible()
   await expect(page.locator('.log-line', { hasText: 'derrotado' }).first()).toBeVisible({ timeout: 120_000 })
 
   /*

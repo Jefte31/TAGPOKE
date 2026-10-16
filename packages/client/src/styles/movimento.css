@@ -198,6 +198,7 @@ button.slot:active:not(:disabled) {
   display: flex;
   align-items: center;
   gap: var(--space-1);
+  max-width: calc(100% - 2 * var(--space-3));
   padding: var(--space-1);
   border-radius: var(--raio);
   background: color-mix(in srgb, var(--fundo) 82%, transparent);
@@ -208,9 +209,11 @@ button.slot:active:not(:disabled) {
  * de caçada sem cena, apertável e sem nada para aproximar. */
 .zoom[hidden] { display: none; }
 
+/* Alvos de toque de pelo menos 44 px em celulares. */
 .zoom-botao {
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 2.75rem;
+  min-width: 2.75rem;
+  height: 2.75rem;
   padding: 0;
   border: 0;
   border-radius: var(--raio-p);
@@ -233,4 +236,12 @@ button.slot:active:not(:disabled) {
   font: 400 0.8125rem/1 var(--fonte-texto);
   font-variant-numeric: tabular-nums;
   text-align: center;
+}
+
+/* Retorno explícito à visão normal (1x), mesmo depois de 0,5x. */
+.zoom-normal { width: auto; min-width: 3.5rem; padding: 0 var(--space-2); font-size: 0.75rem; }
+@media (max-width: 400px) {
+  .zoom { right: var(--space-2); bottom: var(--space-2); gap: 2px; }
+  .zoom-botao { width: 2.75rem; min-width: 2.75rem; }
+  .zoom-normal { width: auto; min-width: 3.5rem; }
 }

@@ -1,5 +1,14 @@
 # Deploy
 
+> **Atenção a forks:** o domínio `pokeidle.187-77-37-92.sslip.io`, o script
+> `/opt/pokeidle/deploy.sh` e os nomes de segredos abaixo documentam a infraestrutura
+> do projeto original. Antes de habilitar `deploy.yml` no TAGPOKE, configure sua própria
+> VPS, URL pública e segredos. Clonar o repositório não publica o jogo automaticamente.
+> Depois de preparar sua infraestrutura, habilite explicitamente a variável de repositório
+> **Settings → Secrets and variables → Actions → Variables → New repository variable**
+> com nome `TAGPOKE_DEPLOY_ENABLED` e valor `true`. Sem essa variável, o workflow de deploy
+> fica desativado, mesmo quando o CI passa.
+
 O jogo roda como um container só: um processo serve a API, o WebSocket e o build do cliente. O
 Postgres fica fora. Nada no código conhece o provedor, então trocar de host é editar este
 documento e o `fly.toml`.

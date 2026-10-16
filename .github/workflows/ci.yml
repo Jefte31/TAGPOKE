@@ -116,14 +116,29 @@ jobs:
           tags: pokeidle:ci
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      - name: A imagem sobe e responde /health
+      - name: Subir a imagem com Postgres e testar /health
         run: |
-          docker run -d --name pokeidle-ci -p 3000:3000 \
-            -e DATABASE_URL=postgres://invalido:invalido@127.0.0.1:1/naoexiste \
+          set -euo pipefail
+          docker network create pokeidle-ci
+          trap 'docker logs pokeidle-ci 2>/dev/null || true; docker rm -f pokeidle-ci pokeidle-ci-db 2>/dev/null || true; docker network rm pokeidle-ci 2>/dev/null || true' EXIT
+
+          docker run -d --name pokeidle-ci-db --network pokeidle-ci \
+            -e POSTGRES_USER=pokeidle -e POSTGRES_PASSWORD=pokeidle \
+            -e POSTGRES_DB=pokeidle postgres:16
+          banco_pronto=0
+          for i in $(seq 1 30); do
+            if docker exec pokeidle-ci-db pg_isready -U pokeidle -d pokeidle; then banco_pronto=1; break; fi
+            sleep 1
+          done
+          test "$banco_pronto" -eq 1
+
+          docker run -d --name pokeidle-ci --network pokeidle-ci -p 127.0.0.1:3000:3000 \
+            -e DATABASE_URL=postgres://pokeidle:pokeidle@pokeidle-ci-db:5432/pokeidle \
             -e APP_ORIGIN=http://localhost:3000 -e COOKIE_SECURE=false \
-            pokeidle:ci || true
-          sleep 5
-          docker logs pokeidle-ci | tail -20
-          # Sem banco o processo sai na migração; o que este passo prova é que a imagem
-          # existe, tem as dependências e chega a executar. O deploy real valida /health.
-          docker image inspect pokeidle:ci >/dev/null
+            pokeidle:ci
+          saudavel=0
+          for i in $(seq 1 45); do
+            if curl -fsS --max-time 3 http://127.0.0.1:3000/health | grep -q '"status":"ok"'; then saudavel=1; break; fi
+            sleep 2
+          done
+          test "$saudavel" -eq 1

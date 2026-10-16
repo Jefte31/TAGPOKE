@@ -19,7 +19,8 @@ concurrency:
 jobs:
   publicar:
     # `workflow_run` dispara mesmo quando o CI falha; esta guarda é o que segura o deploy ruim.
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    # Forks só publicam após configurar sua própria VPS e habilitar a variável no GitHub.
+    if: vars.TAGPOKE_DEPLOY_ENABLED == 'true' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     environment:
       name: producao
