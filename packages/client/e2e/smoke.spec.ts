@@ -17,6 +17,8 @@ test('registrar, inicial, Campo Inicial, derrota, mochila, parar e comprar na lo
     if (u.pathname.includes('/assets/atlas/')) atlas.push(`${r.status()} ${u.pathname}${u.search}`)
   })
   await page.goto('/')
+  await expect(page).toHaveTitle('TAGPOKE')
+  await expect(page.getByRole('heading', { name: 'TAGPOKE' })).toBeVisible()
 
   await page.getByRole('button', { name: 'Registrar' }).click()
   await page.getByLabel('E-mail').fill(email)

@@ -1,11 +1,11 @@
-# Pokeidle
+# TAGPOKE
 
 MMO idle de Pokémon que roda no navegador: você escolhe uma área, seu Pokémon caça sozinho, e o
 progresso continua com a aba fechada. A simulação inteira acontece no servidor.
 
 [![CI](https://github.com/Jefte31/TAGPOKE/actions/workflows/ci.yml/badge.svg)](https://github.com/Jefte31/TAGPOKE/actions/workflows/ci.yml)
 
-**Deploy de referência:** <https://pokeidle.187-77-37-92.sslip.io> — hospedagem do projeto de origem, não necessariamente vinculada ao fork TAGPOKE. Para publicar este fork, veja [docs/deploy.md](docs/deploy.md).
+**Endereço destinado ao TAGPOKE:** <https://pokeidle.187-77-37-92.sslip.io>. O domínio já está configurado como destino do workflow, mas **o servidor precisa estar atualizado para buscar `Jefte31/TAGPOKE`** antes de anunciarmos que a versão mais recente está publicada. Veja o [procedimento de vinculação da VPS](docs/deploy.md#vincular-o-endereço-público-ao-tagpoke).
 
 ![A tela de jogo: numa caverna, o Blastoise do jogador acerta 49 de dano num Arcanine selvagem a três tiles de distância; ficha e time à esquerda, golpes e situação à direita, registro embaixo](docs/imagens/jogo.webp)
 

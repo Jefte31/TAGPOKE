@@ -49,7 +49,7 @@ export function mountAuth(root: HTMLElement, ctx: AppContext): () => void {
       el('div', { class: 'auth-cartao panel cantoneiras' },
         // A Poké Ball acompanha o nome, não o substitui: é a marca do produto na primeira tela,
         // e é o sprite oficial — o mesmo acervo dos ícones do menu, não um desenho nosso.
-        el('h1', {}, el('span', { class: 'auth-marca', 'aria-hidden': 'true' }), 'Pokeidle'),
+        el('h1', {}, el('span', { class: 'auth-marca', 'aria-hidden': 'true' }), 'TAGPOKE'),
         el('p', { class: 'auth-lema' }, 'Seu time caça sozinho. Você escolhe onde.'),
         tabs, form)))
   }
