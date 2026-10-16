@@ -16,7 +16,7 @@ import { animatedTileLayer, bakePlacements } from './map-layer.js'
 import { splitLayer } from './map-parts.js'
 import { type Entities } from './reconcile.js'
 import { loadSheets } from './sprites.js'
-import { ZOOM_MAXIMO, ZOOM_MINIMO, ZOOM_PADRAO } from './zoom-limites.js'
+import { normalizarZoom, ZOOM_PADRAO } from './zoom-limites.js'
 
 export interface SceneDeps {
   readonly atlas: AtlasData
@@ -159,8 +159,8 @@ export async function createScene(parent: HTMLElement, deps: SceneDeps): Promise
    * de combate precisa mostrar. A 2x o painel enquadra ~13 tiles e a criatura tem 64 px, que é a
    * proporção que o gênero usa e a que a referência mostra.
    *
-   * `pixelated` e `roundPixels` já estão ligados na cena, então dobrar é ampliação inteira de
-   * pixel art: nenhum contorno borra. O 1x continua no teclado, para quem quiser ver mais mapa.
+   * O controle pode reduzir até 0,5x para mostrar mais terreno em telas pequenas. A ampliação
+   * tradicional de 2x continua o padrão no desktop; no mobile começamos em 1x.
    */
   let zoom = ZOOM_PADRAO
 
@@ -293,7 +293,7 @@ export async function createScene(parent: HTMLElement, deps: SceneDeps): Promise
   return {
     applyView: (view) => { prev = entityLayer.applyView(view, prev) },
     onEvent,
-    setZoom: (z) => { zoom = Math.min(ZOOM_MAXIMO, Math.max(ZOOM_MINIMO, Math.round(z))) },
+    setZoom: (z) => { zoom = normalizarZoom(z) },
     zoom: () => zoom,
     resize: () => app.resize(),
     destroy: () => {
